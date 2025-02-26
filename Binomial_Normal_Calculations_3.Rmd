@@ -1,0 +1,139 @@
+---
+title: "stockstill_casey_quiz3_binf702"
+output: html_notebook
+author: "Casey Stockstill"
+date: "2025-02-24"
+output:
+  word_document: default
+  pdf_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+Question 1 Restated: Among 64 TMB patients, the following 2×2 table compares the standard angiogram (gold standard) with a noninvasive test:
+
+Noninvasive Test Negative Noninvasive Test Positive Angiogram Negative 21 8 Angiogram Positive 3 32 Using this data:
+
+(a) Compute the sensitivity (i.e. the proportion of angiogram‐positive patients who test positive by the noninvasive method).
+(b) Compute the specificity (i.e. the proportion of angiogram‐negative patients who test negative).
+(c) Assuming a stroke prevalence of 20% among TMB patients, compute the positive predictive value (PV+).
+
+```{r}
+# Create the contingency table
+ct <- matrix(c(21, 8, 3, 32), nrow = 2, byrow = TRUE)
+rownames(ct) <- c("Angio_Negative", "Angio_Positive")
+colnames(ct) <- c("Noninv_Negative", "Noninv_Positive")
+print(ct)
+
+# Compute sensitivity = TP/(TP+FN)
+sensitivity <- ct["Angio_Positive", "Noninv_Positive"] / sum(ct["Angio_Positive",])
+print(paste("Sensitivity =", round(sensitivity, 4)))
+
+# Compute specificity = TN/(TN+FP)
+specificity <- ct["Angio_Negative", "Noninv_Negative"] / sum(ct["Angio_Negative",])
+print(paste("Specificity =", round(specificity, 4)))
+
+# Given prevalence of stroke (among TMB patients) is 20%
+prev <- 0.20
+# Positive Predictive Value (PV+)
+ppv <- (sensitivity * prev) / (sensitivity * prev + (1 - specificity) * (1 - prev))
+print(paste("Positive Predictive Value (PV+) =", round(ppv, 4)))
+
+```
+
+```{r}
+# Create a mosaic plot for the contingency table
+mosaicplot(ct, main = "Angiogram vs Noninvasive Test", 
+           color = c("lightblue", "pink"), xlab = "Noninvasive Test", 
+           ylab = "Angiogram")
+
+```
+
+Question 2(a) Restated: For the Stanford Binet IQ test (mean = 100, SD = 16), Mensa membership requires scoring in the upper 2% of the population. Find the cutoff score (i.e. the 98th percentile).
+
+R Code:
+
+```{r}
+# Calculate the 98th percentile (upper 2%) cutoff score
+cutoff <- qnorm(0.98, mean = 100, sd = 16)
+print(paste("Mensa cutoff score =", round(cutoff, 2)))
+
+```
+
+```{r}
+# Plot the normal distribution for IQ scores
+x <- seq(60, 160, length.out = 1000)
+y <- dnorm(x, mean = 100, sd = 16)
+plot(x, y, type = "l", main = "Stanford Binet IQ Distribution", 
+     xlab = "IQ Score", ylab = "Density")
+abline(v = cutoff, col = "red", lwd = 2, lty = 2)
+text(cutoff + 2, max(y) * 0.5, labels = paste("Cutoff =", round(cutoff, 1)), 
+     col = "red")
+
+```
+
+Question 2(b) Restated: Assume that the number of violent asthma attacks seen in an emergency ward follows a Poisson distribution with a 1‑day rate of λ = 2. What is the probability of observing 5 or more cases over a 2‑day period?
+
+Note: Since the 1‑day parameter wasn’t explicitly given, we assume λ = 2 per day so that over 2 days the mean becomes 4.
+
+R Code:
+
+```{r}
+# Define the one-day Poisson rate and compute the two-day rate
+lambda_day <- 2
+lambda_2day <- 2 * lambda_day  # for 2 days
+
+# Calculate probability of observing 5 or more cases in 2 days
+prob_5_or_more <- 1 - ppois(4, lambda = lambda_2day)
+print(paste("Probability of 5 or more cases =", round(prob_5_or_more, 4)))
+
+```
+
+```{r}
+# Compute Poisson probabilities for a range of counts
+x_poisson <- 0:15
+y_poisson <- dpois(x_poisson, lambda = lambda_2day)
+barplot(y_poisson, names.arg = x_poisson, 
+        main = "Poisson Distribution (2-day period, λ = 4)", 
+        xlab = "Number of Cases", ylab = "Probability", 
+        col = "lightgreen")
+# Draw a vertical line at 5 cases to highlight the cutoff
+abline(v = 5, col = "red", lwd = 2, lty = 2)
+
+```
+
+Question 2(c) Restated: The rate of myocardial infarction (MI) in 50–59‑year‑old disease‑free women is about 10 per 1,000 over 5 years (i.e. p = 0.01). In a sample of 1,000 postmenopausal women taking hormones, only 3 MIs were observed over 5 years. Using the binomial distribution (n = 1000, p = 0.01), assess whether 3 events represent an unusually small number (i.e. compute the probability of observing 3 or fewer events).
+
+R Code:
+
+```{r}
+# Set parameters for the binomial distribution
+n <- 1000
+p_event <- 10 / 1000  # 0.01
+
+# Calculate the probability of observing 3 or fewer MIs
+p_small <- pbinom(3, size = n, prob = p_event)
+print(paste("Probability of 3 or fewer events =", round(p_small, 4)))
+
+```
+
+```{r}
+# Define a range for the number of events
+x_binom <- 0:20
+y_binom <- dbinom(x_binom, size = n, prob = p_event)
+barplot(y_binom, names.arg = x_binom, 
+        main = "Binomial Distribution of MI Events (n = 1000, p = 0.01)", 
+        xlab = "Number of MI Events", ylab = "Probability", 
+        col = "lightcoral")
+# Highlight the bars corresponding to 0 to 3 events
+rect(xleft = 0.5, ybottom = 0, xright = 4.5, ytop = max(y_binom)*1.1, 
+     border = "blue", lwd = 2, lty = 2)
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
